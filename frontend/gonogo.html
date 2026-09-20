@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>反应抑制 - 脑训练</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/gonogo.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/starfield.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+
+    <div class="game-container">
+        <div class="top-bar">
+            <div class="back-btn" onclick="location.href='/'">←</div>
+            <div class="game-title">反应抑制</div>
+            <div style="width: 40px;"></div>
+        </div>
+
+        <div class="level-switch">
+            <button data-level="beginner" onclick="switchLevel('beginner')">初级</button>
+            <button data-level="intermediate" onclick="switchLevel('intermediate')">中级</button>
+            <button data-level="advanced" onclick="switchLevel('advanced')">高级</button>
+        </div>
+
+        <div class="progress-bar">
+            <span>进度 <strong id="progress">0/20</strong></span>
+            <span>正确 <strong id="correct-count">0</strong></span>
+            <span>错误 <strong id="wrong-count" class="error-num">0</strong></span>
+        </div>
+
+        <!-- 游戏区（点击区域） -->
+        <div class="stimulus-area" id="stimulus-area" onclick="handleClick()">
+            <div class="stimulus" id="stimulus"></div>
+        </div>
+
+        <p class="hint">看到<strong>绿色圆圈</strong>点击，看到<strong>红色方块</strong>不要点</p>
+
+        <!-- 结算遮罩 -->
+        <div class="result-overlay" id="result-overlay">
+            <div class="result-card">
+                <h2>训练完成</h2>
+                <div class="stars" id="stars">⭐⭐⭐⭐⭐</div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="final-score">0</div>
+                        <div class="stat-label">得分</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="final-correct">0</div>
+                        <div class="stat-label">正确</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="final-wrong">0</div>
+                        <div class="stat-label">错误</div>
+                    </div>
+                </div>
+                <div class="result-buttons">
+                    <button class="btn-secondary" onclick="closeResult()">再练一次</button>
+                    <button class="btn-primary-sm" onclick="location.href='/'">返回首页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ 难度配置 ============
+        const LEVELS = {
+            "beginner":     { total: 20, timeLimit: 1500, noGoRate: 0.25 },
+            "intermediate": { total: 30, timeLimit: 1000, noGoRate: 0.25 },
+            "advanced":     { total: 40, timeLimit: 800,  noGoRate: 0.30 }
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let levelKey = urlParams.get("level") || "beginner";
+        if (!LEVELS[levelKey]) levelKey = "beginner";
+        let TOTAL = 20;
+        let TIME_LIMIT = 1500;
+        let NO_GO_RATE = 0.25;
+
+        // ============ 状态 ============
+        let progress = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let isGo = false;          // 当前是 Go 还是 No-Go
+        let hasClicked = false;    // 这轮用户点了吗
+        let roundOver = false;     // 这轮结束了吗
+        let timeoutHandle = null;
+
+        // ============ 初始化 ============
+        function applyLevel() {
+            const lv = LEVELS[levelKey];
+            TOTAL = lv.total;
+            TIME_LIMIT = lv.timeLimit;
+            NO_GO_RATE = lv.noGoRate;
+            document.querySelectorAll(".level-switch button").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.level === levelKey);
+            });
+        }
+
+        function switchLevel(newLevel) {
+            levelKey = newLevel;
+            applyLevel();
+            restartGame();
+        }
+
+        // ============ 出题 ============
+        function nextRound() {
+            if (progress >= TOTAL) {
+                finishGame();
+                return;
+            }
+
+            progress++;
+            document.getElementById("progress").textContent = progress + "/" + TOTAL;
+
+            isGo = Math.random() > NO_GO_RATE;   // 75% 概率是 Go
+            hasClicked = false;
+            roundOver = false;
+
+            const stim = document.getElementById("stimulus");
+            stim.className = "stimulus " + (isGo ? "go" : "nogo");
+            stim.textContent = "";   // 图形由 CSS 画
+
+            // 启动超时
+            if (timeoutHandle) clearTimeout(timeoutHandle);
+            timeoutHandle = setTimeout(() => {
+                if (!roundOver) {
+                    handleTimeout();
+                }
+            }, TIME_LIMIT);
+        }
+
+        // ============ 用户点击 ============
+        function handleClick() {
+            if (roundOver) return;
+            roundOver = true;
+            if (timeoutHandle) clearTimeout(timeoutHandle);
+
+            if (isGo) {
+                // 正确：看到绿色圆圈点了
+                correctCount++;
+                document.getElementById("correct-count").textContent = correctCount;
+                document.getElementById("stimulus").classList.add("flash-correct");
+            } else {
+                // 错误：看到红色方块还点
+                wrongCount++;
+                document.getElementById("wrong-count").textContent = wrongCount;
+                document.getElementById("stimulus").classList.add("flash-wrong");
+            }
+
+            setTimeout(() => {
+                document.getElementById("stimulus").classList.remove("flash-correct", "flash-wrong");
+                nextRound();
+            }, 300);
+        }
+
+        // ============ 超时 ============
+        function handleTimeout() {
+            roundOver = true;
+            if (isGo) {
+                // 错误：绿色圆圈没点（漏点）
+                wrongCount++;
+                document.getElementById("wrong-count").textContent = wrongCount;
+            } else {
+                // 正确：红色方块没点（忍住了）
+                correctCount++;
+                document.getElementById("correct-count").textContent = correctCount;
+            }
+
+            setTimeout(() => {
+                nextRound();
+            }, 200);
+        }
+
+        // ============ 计分 ============
+        function calcScore() {
+            const factor = levelKey === "beginner" ? 1.0 : (levelKey === "intermediate" ? 1.5 : 2.0);
+            let score = correctCount * 60 * factor - wrongCount * 25;
+            return Math.max(0, Math.round(score));
+        }
+
+        function calcStars(score) {
+            if (score >= 1500) return 5;
+            if (score >= 1100) return 4;
+            if (score >= 800) return 3;
+            if (score >= 400) return 2;
+            return 1;
+        }
+
+        // ============ 结束 ============
+        function finishGame() {
+            if (timeoutHandle) clearTimeout(timeoutHandle);
+            const score = calcScore();
+            const stars = calcStars(score);
+
+            document.getElementById("final-score").textContent = score;
+            document.getElementById("final-correct").textContent = correctCount;
+            document.getElementById("final-wrong").textContent = wrongCount;
+            document.getElementById("stars").textContent = "⭐".repeat(stars);
+
+            const userId = localStorage.getItem("user_id");
+            fetch("/api/record", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: parseInt(userId),
+                    game: "gonogo",
+                    level: levelKey,
+                    duration: 0,
+                    errors: wrongCount,
+                    score: score
+                })
+            }).catch(err => console.error("保存失败", err));
+
+            setTimeout(() => {
+                document.getElementById("result-overlay").classList.add("show");
+            }, 300);
+        }
+
+        function restartGame() {
+            if (timeoutHandle) clearTimeout(timeoutHandle);
+            progress = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            document.getElementById("correct-count").textContent = "0";
+            document.getElementById("wrong-count").textContent = "0";
+            document.getElementById("progress").textContent = "0/" + TOTAL;
+            nextRound();
+        }
+
+        function closeResult() {
+            document.getElementById("result-overlay").classList.remove("show");
+            restartGame();
+        }
+
+        // ============ 启动 ============
+        applyLevel();
+        restartGame();
+    </script>
+
+</body>
+</html>

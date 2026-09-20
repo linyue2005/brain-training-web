@@ -1,0 +1,116 @@
+/* ==================================================
+   index.css —— 首页专用样式
+   ================================================== */
+
+body {
+    padding: 40px 20px;
+    align-items: flex-start;
+}
+
+.card {
+    max-width: 500px;
+    padding: 35px 30px;
+}
+
+/* 用户栏 */
+.user-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 12px 18px;
+    background: var(--gray-bg);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.user-bar strong {
+    color: var(--primary-hover);
+}
+
+.user-bar a {
+    color: var(--danger);
+    text-decoration: none;
+    font-size: 13px;
+    transition: opacity 0.2s;
+}
+
+.user-bar a:hover {
+    opacity: 0.7;
+}
+
+/* 游戏卡片 */
+.game-card {
+    background: linear-gradient(135deg, #9ec49a, #7fa878);
+    border-radius: 18px;
+    padding: 24px 26px;
+    color: white;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 20px rgba(127, 168, 120, 0.3);
+}
+
+.game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(127, 168, 120, 0.45);
+}
+
+.game-card .info h3 {
+    font-size: 20px;
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.game-card .info p {
+    font-size: 13px;
+    opacity: 0.92;
+}
+
+.game-card .arrow {
+    font-size: 26px;
+    opacity: 0.85;
+    transition: transform 0.2s;
+}
+
+.game-card:hover .arrow {
+    transform: translateX(5px);
+}
+.user-bar a:first-child {
+    transition: color 0.2s;
+}
+
+.user-bar a:first-child:hover {
+    color: var(--primary-hover);
+}
+/* 打卡卡片——橙色系，跟游戏卡区分 */
+.checkin-card {
+    background: linear-gradient(135deg, #f4a261, #e76f51) !important;
+    box-shadow: 0 8px 20px rgba(231, 111, 81, 0.3) !important;
+}
+
+.checkin-card:hover {
+    box-shadow: 0 14px 30px rgba(231, 111, 81, 0.45) !important;
+}
+/* Stroop 卡片——蓝紫色系 */
+.stroop-card {
+    background: linear-gradient(135deg, #7b9bd1, #5a7bb0) !important;
+    box-shadow: 0 8px 20px rgba(90, 123, 176, 0.3) !important;
+}
+
+.stroop-card:hover {
+    box-shadow: 0 14px 30px rgba(90, 123, 176, 0.45) !important;
+}
+/* 反应抑制卡片——蓝青色系 */
+.gonogo-card {
+    background: linear-gradient(135deg, #4db6ac, #00897b) !important;
+    box-shadow: 0 8px 20px rgba(0, 128, 123, 0.3) !important;
+}
+
+.gonogo-card:hover {
+    box-shadow: 0 14px 30px rgba(0, 128, 123, 0.45) !important;
+}

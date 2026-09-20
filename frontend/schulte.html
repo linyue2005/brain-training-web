@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>舒尔特表</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/game.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/starfield.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+        <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <div class="game-container">
+        <div class="top-bar">
+            <div class="back-btn" onclick="location.href='/schulte-detail.html'">←</div>
+            <div class="game-title">舒尔特表</div>
+            <div style="width: 40px;"></div>
+        </div>
+
+        <div class="level-switch">
+            <button data-level="beginner" onclick="switchLevel('beginner')">初级</button>
+            <button data-level="intermediate" onclick="switchLevel('intermediate')">中级</button>
+            <button data-level="advanced" onclick="switchLevel('advanced')">高级</button>
+        </div>
+
+        <div class="status-bar">
+            <div>用时<span id="timer">0.0</span>秒</div>
+            <div>下一个<span id="next-num">1</span></div>
+            <div>错误<span id="error-count" class="error-num">0</span></div>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <div class="game-actions">
+            <button class="btn-game" onclick="startGame()">重新开始</button>
+        </div>
+
+        <!-- 结算遮罩层 -->
+        <div class="result-overlay" id="result-overlay">
+            <div class="result-card">
+                <h2>训练完成</h2>
+                <div class="stars" id="stars">⭐⭐⭐⭐⭐</div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="final-score">0</div>
+                        <div class="stat-label">得分</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="final-time">0s</div>
+                        <div class="stat-label">用时</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="final-accuracy">100%</div>
+                        <div class="stat-label">正确率</div>
+                    </div>
+                </div>
+
+                <div class="result-buttons">
+                    <button class="btn-secondary" onclick="closeResult()">再练一次</button>
+                    <button class="btn-primary-sm" onclick="location.href='/schulte-detail.html'">返回详情</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LEVELS = {
+            "beginner":     { size: 3, name: "初级", factor: 1.0 },
+            "intermediate": { size: 4, name: "中级", factor: 1.5 },
+            "advanced":     { size: 5, name: "高级", factor: 2.0 }
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let levelKey = urlParams.get("level") || "beginner";
+        if (!LEVELS[levelKey]) levelKey = "beginner";
+
+        let SIZE = 0;
+        let TOTAL = 0;
+        let nextNumber = 1;
+        let startTime = null;
+        let timerInterval = null;
+        let gameOver = false;
+        let errorCount = 0;
+
+        function applyLevel() {
+            const level = LEVELS[levelKey];
+            SIZE = level.size;
+            TOTAL = SIZE * SIZE;
+            document.title = "舒尔特表 - " + level.name;
+
+            // 根据屏幕宽度动态计算格子大小
+            // 用 min(屏幕宽度 - 80, 500) 作为整个格子区的最大宽度
+            const maxGridWidth = Math.min(window.innerWidth - 60, 480);
+            // 间隙是 12px，有 SIZE-1 个间隙
+            const gapTotal = 12 * (SIZE - 1);
+            let cellSize = Math.floor((maxGridWidth - gapTotal) / SIZE);
+            // 限制最大尺寸，避免大屏上格子太大
+            if (cellSize > 110) cellSize = 110;
+
+            const grid = document.getElementById("grid");
+            grid.style.gridTemplateColumns = `repeat(${SIZE}, ${cellSize}px)`;
+            grid.style.gridTemplateRows = `repeat(${SIZE}, ${cellSize}px)`;
+
+            // 字号也随格子大小调整
+            const fontSize = Math.floor(cellSize * 0.28);
+            grid.querySelectorAll(".cell").forEach(cell => {
+                cell.style.fontSize = fontSize + "px";
+            });
+
+            document.querySelectorAll(".level-switch button").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.level === levelKey);
+            });
+        }
+
+        function switchLevel(newLevel) {
+            levelKey = newLevel;
+            applyLevel();
+            startGame();
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            nextNumber = 1;
+            startTime = null;
+            gameOver = false;
+            errorCount = 0;
+
+            document.getElementById("next-num").textContent = "1";
+            document.getElementById("timer").textContent = "0.0";
+            document.getElementById("error-count").textContent = "0";
+
+            if (timerInterval) clearInterval(timerInterval);
+
+            const numbers = [];
+            for (let i = 1; i <= TOTAL; i++) numbers.push(i);
+            shuffle(numbers);
+
+            const grid = document.getElementById("grid");
+            grid.innerHTML = "";
+            numbers.forEach(num => {
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                cell.textContent = num;
+                cell.dataset.num = num;
+                cell.onclick = () => handleClick(cell);
+                grid.appendChild(cell);
+            });
+        }
+
+        function handleClick(cell) {
+            if (cell.classList.contains("correct")) return;
+            if (gameOver) return;
+
+            const clickedNum = parseInt(cell.dataset.num);
+
+            if (clickedNum === nextNumber) {
+                cell.classList.add("correct");
+                if (startTime === null) {
+                    startTime = Date.now();
+                    timerInterval = setInterval(updateTimer, 100);
+                }
+                nextNumber++;
+                if (nextNumber > TOTAL) {
+                    finishGame();
+                } else {
+                    document.getElementById("next-num").textContent = nextNumber;
+                }
+            } else {
+                errorCount++;
+                document.getElementById("error-count").textContent = errorCount;
+                cell.classList.add("wrong");
+                setTimeout(() => cell.classList.remove("wrong"), 300);
+            }
+        }
+
+        function updateTimer() {
+            if (startTime === null) return;
+            const elapsed = (Date.now() - startTime) / 1000;
+            document.getElementById("timer").textContent = elapsed.toFixed(1);
+        }
+
+        function calcScore(duration, errors) {
+            const factor = LEVELS[levelKey].factor;
+            let score = 1000 * factor * (1 - duration / 100) - errors * 20;
+            return Math.max(0, Math.round(score));
+        }
+
+        function calcStars(score, errors) {
+            if (errors > 3) return 1;
+            if (score >= 800) return 5;
+            if (score >= 600) return 4;
+            if (score >= 400) return 3;
+            if (score >= 200) return 2;
+            return 1;
+        }
+
+        function finishGame() {
+            gameOver = true;
+            clearInterval(timerInterval);
+            const totalTime = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
+            document.getElementById("timer").textContent = totalTime.toFixed(1);
+
+            const score = calcScore(totalTime, errorCount);
+            const totalClicks = TOTAL + errorCount;
+            const accuracy = Math.round(TOTAL / totalClicks * 100);
+            const stars = calcStars(score, errorCount);
+
+            fetch("/api/record", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: parseInt(localStorage.getItem("user_id")),
+                    game: "schulte",
+                    level: levelKey,
+                    duration: totalTime,
+                    errors: errorCount,
+                    score: score
+                })
+            }).catch(err => console.error("保存失败", err));
+
+            document.getElementById("final-score").textContent = score;
+            document.getElementById("final-time").textContent = totalTime + "s";
+            document.getElementById("final-accuracy").textContent = accuracy + "%";
+            document.getElementById("stars").textContent = "⭐".repeat(stars);
+
+            setTimeout(() => {
+                document.getElementById("result-overlay").classList.add("show");
+            }, 300);
+        }
+
+        function closeResult() {
+            document.getElementById("result-overlay").classList.remove("show");
+            startGame();
+        }
+
+        applyLevel();
+        startGame();
+        // 窗口大小变化时，重新计算格子大小
+        window.addEventListener("resize", () => {
+            applyLevel();
+            // 注意：不重新开始游戏，只更新格子大小
+            const grid = document.getElementById("grid");
+            const cells = grid.querySelectorAll(".cell");
+            cells.forEach(cell => {
+                cell.style.width = "";
+                cell.style.height = "";
+            });
+        });
+    </script>
+
+</body>
+</html>

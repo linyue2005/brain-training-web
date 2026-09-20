@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>N-Back 记忆</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/detail.css">
+    <script src="/js/theme.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body>
+
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+
+    <div class="card">
+        <div class="top-bar">
+            <div class="back-btn" onclick="location.href='/'">←</div>
+            <h1 class="page-title">N-Back 记忆</h1>
+        </div>
+
+        <div class="levels">
+            <div class="level-card nback-level" onclick="startGame('beginner')">
+                <div class="name">初级</div>
+                <div class="grid-info">1-Back · 20题</div>
+            </div>
+            <div class="level-card nback-level" onclick="startGame('intermediate')">
+                <div class="name">中级</div>
+                <div class="grid-info">2-Back · 25题</div>
+            </div>
+            <div class="level-card nback-level" onclick="startGame('advanced')">
+                <div class="name">高级</div>
+                <div class="grid-info">3-Back · 30题</div>
+            </div>
+        </div>
+
+        <!-- 玩法说明 -->
+        <div class="how-to-play">
+            <h2 class="section-title">📖 玩法说明</h2>
+            <ul class="rules">
+                <li>屏幕会依次闪现字母</li>
+                <li>判断当前字母是否和<strong>前 N 个</strong>相同</li>
+                <li>相同点"是"，不同点"否"</li>
+                <li>初级 1-Back，中级 2-Back，高级 3-Back</li>
+            </ul>
+        </div>
+
+        <h2 class="section-title">最近成绩</h2>
+        <ul class="record-list" id="record-list">
+            <li class="empty">加载中...</li>
+        </ul>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem("user_id");
+        if (!userId) {
+            location.href = "/login.html";
+        }
+
+        function startGame(level) {
+            location.href = "/nback.html?level=" + level;
+        }
+
+        function loadRecords() {
+            fetch("/api/records?limit=10&user_id=" + userId)
+                .then(res => res.json())
+                .then(records => {
+                    const filtered = records.filter(r => r.game === "nback");
+                    const list = document.getElementById("record-list");
+                    if (filtered.length === 0) {
+                        list.innerHTML = '<li class="empty">还没有成绩，快去玩一局吧！</li>';
+                        return;
+                    }
+                    list.innerHTML = "";
+                    const levelNames = { beginner: "初级", intermediate: "中级", advanced: "高级" };
+                    filtered.forEach(r => {
+                        const li = document.createElement("li");
+                        const timeStr = r.created_at.substring(5, 16);
+                        const levelName = levelNames[r.level] || r.level;
+                        li.innerHTML = `
+                            <span class="time-text">${timeStr} · ${levelName}</span>
+                            <span class="duration">${r.score} 分</span>
+                        `;
+                        list.appendChild(li);
+                    });
+                })
+                .catch(err => {
+                    console.error("加载失败：", err);
+                    document.getElementById("record-list").innerHTML =
+                        '<li class="empty">加载失败，请刷新试试</li>';
+                });
+        }
+
+        loadRecords();
+    </script>
+
+</body>
+</html>

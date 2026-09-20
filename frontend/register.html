@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>注册 - 脑训练</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/starfield.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+        <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <div class="card">
+        <h1>脑训练</h1>
+        <p class="subtitle">创建你的账号</p>
+
+        <div class="form-group">
+            <label>用户名</label>
+            <input type="text" id="username" placeholder="请输入用户名（至少 2 位）">
+        </div>
+
+        <div class="form-group">
+            <label>密码</label>
+            <input type="password" id="password" placeholder="请输入密码（至少 6 位）">
+        </div>
+
+        <button class="btn-primary" id="register-btn" onclick="handleRegister()">注 册</button>
+
+        <div class="message" id="message"></div>
+
+        <div class="link">
+            已有账号？ <a href="/login.html">去登录</a>
+        </div>
+    </div>
+
+    <script>
+        function handleRegister() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value;
+            const message = document.getElementById("message");
+            const btn = document.getElementById("register-btn");
+
+            if (username.length < 2) {
+                message.textContent = "用户名至少 2 个字符";
+                message.className = "message error";
+                return;
+            }
+            if (password.length < 6) {
+                message.textContent = "密码至少 6 个字符";
+                message.className = "message error";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "注册中...";
+            message.textContent = "";
+
+            fetch("/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    message.textContent = "✅ 注册成功，正在跳转登录页...";
+                    message.className = "message success";
+                    setTimeout(() => {
+                        location.href = "/login.html";
+                    }, 1200);
+                } else {
+                    message.textContent = "❌ " + data.message;
+                    message.className = "message error";
+                    btn.disabled = false;
+                    btn.textContent = "注 册";
+                }
+            })
+            .catch(err => {
+                message.textContent = "❌ 网络错误，请重试";
+                message.className = "message error";
+                btn.disabled = false;
+                btn.textContent = "注 册";
+            });
+        }
+    </script>
+
+</body>
+</html>

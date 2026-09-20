@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心 - 脑训练</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/profile.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/starfield.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+
+    <div class="card">
+        <div class="top-bar">
+            <div class="back-btn" onclick="location.href='/'">←</div>
+            <h1 class="page-title">个人中心</h1>
+        </div>
+
+        <!-- 用户信息 -->
+        <div class="user-info">
+            <div class="avatar">👤</div>
+            <div class="username" id="username">加载中...</div>
+            <div class="join-date" id="join-date"></div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-num" id="total-count">0</div>
+                <div class="stat-label">总训练次数</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" id="total-duration">0s</div>
+                <div class="stat-label">总时长</div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-num" id="best-score">0</div>
+                <div class="stat-label">最高分</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" id="avg-score">0</div>
+                <div class="stat-label">平均分</div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="logout()" style="margin-top:30px;">退出登录</button>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem("user_id");
+        if (!userId) {
+            location.href = "/login.html";
+        }
+
+        // 加载用户统计
+        fetch("/api/user/stats?user_id=" + userId)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("username").textContent = data.username;
+                document.getElementById("join-date").textContent = "加入于 " + data.created_at;
+                document.getElementById("total-count").textContent = data.total_count;
+                document.getElementById("total-duration").textContent = data.total_duration + "s";
+                document.getElementById("best-score").textContent = data.best_score;
+                document.getElementById("avg-score").textContent = data.avg_score;
+            })
+            .catch(err => {
+                console.error("加载失败：", err);
+            });
+
+        // 退出登录
+        function logout() {
+            if (!confirm("确定要退出登录吗？")) return;
+            localStorage.removeItem("user_id");
+            localStorage.removeItem("username");
+            location.href = "/login.html";
+        }
+    </script>
+
+</body>
+</html>

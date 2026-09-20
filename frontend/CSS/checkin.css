@@ -1,0 +1,157 @@
+/* ==================================================
+   checkin.css —— 打卡页专用
+   ================================================== */
+
+body {
+    padding: 40px 20px;
+    align-items: flex-start;
+}
+
+.card {
+    max-width: 480px;
+    padding: 30px;
+}
+
+/* 顶部栏 */
+.top-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.back-btn {
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-sub);
+    padding: 5px 15px 5px 0;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.back-btn:hover {
+    color: var(--text-main);
+}
+
+.page-title {
+    font-size: 20px;
+    color: var(--text-main);
+    text-align: left;
+    margin-bottom: 0;
+}
+
+/* 连续打卡大卡片 */
+.continuous-card {
+    background: linear-gradient(135deg, #9ec49a, #7fa878);
+    border-radius: 18px;
+    padding: 30px 20px;
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px rgba(127, 168, 120, 0.35);
+}
+
+.continuous-card .fire {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.continuous-card .continuous-num {
+    font-size: 56px;
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.continuous-card .continuous-label {
+    font-size: 14px;
+    opacity: 0.95;
+    letter-spacing: 1px;
+}
+
+/* 小标题 */
+.section-title {
+    font-size: 16px;
+    color: var(--text-main);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid var(--gray-border);
+    text-align: left;
+}
+
+/* 最近 7 天 */
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 30px;
+}
+
+.day-box {
+    background: var(--gray-bg);
+    border-radius: var(--radius-sm);
+    padding: 10px 4px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.day-box.checked {
+    background: linear-gradient(135deg, #9ec49a, #7fa878);
+    color: white;
+    box-shadow: 0 4px 10px rgba(127, 168, 120, 0.3);
+}
+
+.day-box .week-name {
+    font-size: 11px;
+    opacity: 0.75;
+    margin-bottom: 3px;
+    color: var(--text-sub);
+}
+
+.day-box.checked .week-name {
+    color: white;
+    opacity: 0.9;
+}
+
+.day-box .date-num {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--text-main);
+    margin-bottom: 3px;
+}
+
+.day-box.checked .date-num {
+    color: white;
+}
+
+.day-box .check-mark {
+    font-size: 12px;
+    height: 14px;
+    color: white;
+    font-weight: bold;
+}
+
+/* 统计卡片 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.stat-box {
+    background: var(--gray-bg);
+    border-radius: var(--radius-md);
+    padding: 18px 12px;
+    text-align: center;
+}
+
+.stat-num {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-light);
+}

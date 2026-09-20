@@ -1,0 +1,179 @@
+/* ==================================================
+   detail.css —— 详情页专用样式
+   （舒尔特表、以后的其他游戏的详情页）
+   ================================================== */
+
+body {
+    padding: 40px 20px;
+    align-items: flex-start;
+}
+
+.card {
+    max-width: 500px;
+    padding: 30px;
+}
+
+/* 顶部栏 */
+.top-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.back-btn {
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-sub);
+    padding: 5px 15px 5px 0;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.back-btn:hover {
+    color: var(--text-main);
+}
+
+.page-title {
+    font-size: 22px;
+    color: var(--text-main);
+    text-align: left;
+    margin-bottom: 0;
+}
+
+/* 难度卡片 */
+.levels {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.level-card {
+    background: linear-gradient(135deg, #9ec49a, #7fa878);
+    color: white;
+    border-radius: 14px;
+    padding: 18px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 15px rgba(127, 168, 120, 0.25);
+}
+
+.level-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(127, 168, 120, 0.4);
+}
+
+.level-card .name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.level-card .grid-info {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* 小标题 */
+.section-title {
+    font-size: 16px;
+    color: var(--text-main);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid var(--gray-border);
+    text-align: left;
+}
+
+/* 成绩列表 */
+.record-list {
+    list-style: none;
+}
+
+.record-list li {
+    padding: 13px 18px;
+    background: var(--gray-bg);
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.record-list li .time-text {
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+.record-list li .duration {
+    font-weight: bold;
+    color: var(--primary-hover);
+}
+
+.empty {
+    text-align: center;
+    color: var(--text-light);
+    padding: 20px;
+    font-size: 14px;
+    display: block !important;
+}
+/* Stroop 详情页的难度卡片——蓝紫色系 */
+.stroop-level {
+    background: linear-gradient(135deg, #7b9bd1, #5a7bb0);
+    box-shadow: 0 6px 15px rgba(90, 123, 176, 0.25);
+}
+
+.stroop-level:hover {
+    box-shadow: 0 12px 25px rgba(90, 123, 176, 0.4);
+}
+/* Go/No-Go 详情页的难度卡片——蓝青色系 */
+.gonogo-level {
+    background: linear-gradient(135deg, #4db6ac, #00897b);
+    box-shadow: 0 6px 15px rgba(0, 128, 123, 0.25);
+}
+
+.gonogo-level:hover {
+    box-shadow: 0 12px 25px rgba(0, 128, 123, 0.4);
+}
+/* ============ 玩法说明 ============ */
+.how-to-play {
+    margin-bottom: 25px;
+}
+
+.rules {
+    list-style: none;
+    padding: 0;
+}
+
+.rules li {
+    padding: 10px 15px 10px 35px;
+    background: var(--gray-bg);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: var(--text-main);
+    position: relative;
+    line-height: 1.5;
+}
+
+.rules li::before {
+    content: "•";
+    position: absolute;
+    left: 15px;
+    color: var(--primary);
+    font-weight: bold;
+    font-size: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+/* N-Back 详情页的难度卡片——紫色系 */
+.nback-level {
+    background: linear-gradient(135deg, #b39ddb, #7e57c2);
+    box-shadow: 0 6px 15px rgba(126, 87, 194, 0.25);
+}
+
+.nback-level:hover {
+    box-shadow: 0 12px 25px rgba(126, 87, 194, 0.4);
+}

@@ -1,0 +1,261 @@
+/* ==================================================
+   game.css —— 游戏页专用样式
+   （舒尔特表、以后的其他游戏）
+   ================================================== */
+
+body {
+    padding: 20px;
+    align-items: flex-start;
+}
+
+.game-container {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+}
+
+/* 顶部栏 */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-sub);
+    padding: 5px 10px;
+    user-select: none;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    color: var(--text-main);
+    background: var(--gray-bg);
+}
+
+.game-title {
+    font-size: 20px;
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+/* 难度切换 */
+.level-switch {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.level-switch button {
+    padding: 8px 22px;
+    border-radius: 20px;
+    border: none;
+    background: var(--gray-bg);
+    color: var(--text-sub);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.level-switch button.active {
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(127, 168, 120, 0.35);
+}
+
+/* 状态栏 */
+.status-bar {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 25px;
+    font-size: 16px;
+    color: var(--text-sub);
+}
+
+.status-bar span {
+    font-weight: bold;
+    color: var(--primary-hover);
+    margin-left: 4px;
+}
+
+.status-bar .error-num {
+    color: var(--danger);
+}
+
+/* 格子 */
+.grid {
+    display: grid;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.cell {
+    background: white;
+    border: 1.5px solid var(--gray-border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-main);
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 2px 8px rgba(100, 150, 110, 0.08);
+    transition: all 0.15s;
+}
+
+.cell:hover {
+    border-color: var(--primary);
+    transform: scale(1.08);
+    box-shadow: 0 5px 15px rgba(127, 168, 120, 0.25);
+}
+
+.cell.correct {
+    background: linear-gradient(135deg, #9ec49a, #7fa878);
+    color: white;
+    border-color: transparent;
+}
+
+.cell.wrong {
+    background: var(--danger);
+    color: white;
+    border-color: transparent;
+}
+
+/* 底部按钮 */
+.game-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-game {
+    padding: 12px 28px;
+    font-size: 15px;
+    background: linear-gradient(135deg, #9ec49a, #7fa878);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(127, 168, 120, 0.25);
+}
+
+.btn-game:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(127, 168, 120, 0.4);
+}
+
+/* ========== 结算遮罩层 ========== */
+.result-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(46, 74, 58, 0.55);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.result-overlay.show {
+    display: flex;
+}
+
+.result-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 35px 30px;
+    width: 90%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(46, 74, 58, 0.3);
+    animation: slideUp 0.35s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.result-card h2 {
+    font-size: 22px;
+    color: var(--text-main);
+    margin-bottom: 15px;
+}
+
+.stars {
+    font-size: 26px;
+    margin-bottom: 25px;
+    letter-spacing: 6px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+
+.stat-value {
+    font-size: 26px;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+.result-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.result-buttons button {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.btn-secondary {
+    background: var(--gray-bg);
+    color: var(--text-sub);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-border);
+}
+
+.btn-primary-sm {
+    background: linear-gradient(135deg, #9ec49a, #7fa878);
+    color: white;
+    font-weight: bold;
+}
+
+.btn-primary-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(127, 168, 120, 0.4);
+}

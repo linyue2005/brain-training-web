@@ -1,0 +1,252 @@
+/* ==================================================
+   gonogo.css —— 反应抑制（Go/No-Go）游戏
+   ================================================== */
+
+body {
+    padding: 20px;
+    align-items: flex-start;
+}
+
+.game-container {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-sub);
+    padding: 5px 10px;
+    user-select: none;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    color: var(--text-main);
+    background: var(--gray-bg);
+}
+
+.game-title {
+    font-size: 20px;
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+/* 难度切换 */
+.level-switch {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+
+.level-switch button {
+    padding: 8px 22px;
+    border-radius: 20px;
+    border: none;
+    background: var(--gray-bg);
+    color: var(--text-sub);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.level-switch button.active {
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(127, 168, 120, 0.35);
+}
+
+/* 进度栏 */
+.progress-bar {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: var(--text-sub);
+}
+
+.progress-bar strong {
+    color: var(--primary-hover);
+}
+
+.progress-bar .error-num {
+    color: var(--danger);
+}
+
+/* 游戏区 */
+.stimulus-area {
+    background: var(--gray-bg);
+    border-radius: 18px;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s;
+}
+
+.stimulus-area:hover {
+    background: var(--gray-border);
+}
+
+/* 刺激物 */
+.stimulus {
+    width: 0;
+    height: 0;
+    transition: all 0.2s;
+}
+
+.stimulus.go {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
+}
+
+.stimulus.nogo {
+    width: 110px;
+    height: 110px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #e53935, #c62828);
+    box-shadow: 0 10px 30px rgba(229, 57, 53, 0.4);
+}
+
+.stimulus.flash-correct {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 25px rgba(102, 187, 106, 1));
+}
+
+.stimulus.flash-wrong {
+    transform: scale(0.9);
+    filter: drop-shadow(0 0 25px rgba(229, 115, 115, 1));
+}
+
+/* 提示 */
+.hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-bottom: 10px;
+}
+
+.hint strong {
+    color: var(--primary-hover);
+}
+
+/* 结算遮罩 */
+.result-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(46, 74, 58, 0.55);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.result-overlay.show {
+    display: flex;
+}
+
+.result-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: 35px 30px;
+    width: 90%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(46, 74, 58, 0.3);
+    animation: slideUp 0.35s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.result-card h2 {
+    font-size: 22px;
+    color: var(--text-main);
+    margin-bottom: 15px;
+}
+
+.stars {
+    font-size: 26px;
+    margin-bottom: 25px;
+    letter-spacing: 6px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+}
+
+.stat-value {
+    font-size: 26px;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+.result-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.result-buttons button {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.btn-secondary {
+    background: var(--gray-bg);
+    color: var(--text-sub);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-border);
+}
+
+.btn-primary-sm {
+    background: linear-gradient(135deg, #9ec49a, #7fa878);
+    color: white;
+    font-weight: bold;
+}
+
+.btn-primary-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(127, 168, 120, 0.4);
+}

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>脑训练</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/starfield.js"></script>
+    <script src="/js/sleep-reminder.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <div class="card">
+        <!-- 用户栏 -->
+        <div class="user-bar" id="user-bar" style="display:none;">
+            <a href="/profile.html" style="color:inherit; text-decoration:none;">
+                你好，<strong id="current-user"></strong>
+            </a>
+            <a href="#" onclick="logout(); return false;">退出登录</a>
+        </div>
+
+        <h1>脑训练</h1>
+        <p class="subtitle">让大脑保持活力</p>
+
+        <!-- 打卡卡片（新加） -->
+        <div class="game-card checkin-card" onclick="location.href='/checkin.html'">
+            <div class="info">
+                <h3>打卡记录</h3>
+                <p>看看连续训练了几天</p>
+            </div>
+            <div class="arrow">→</div>
+        </div>
+        <!-- 游戏卡片：舒尔特表 -->
+        <div class="game-card" onclick="location.href='/schulte-detail.html'">
+            <div class="info">
+                <h3>舒尔特表</h3>
+                <p>训练注意力与视觉搜索</p>
+            </div>
+            <div class="arrow">→</div>
+        </div>
+        <!-- Stroop 卡片 -->
+        <div class="game-card stroop-card" onclick="location.href='/stroop-detail.html'">
+            <div class="info">
+                <h3>Stroop 色词</h3>
+                <p>训练抑制控制与抗干扰</p>
+            </div>
+            <div class="arrow">→</div>
+        </div>
+
+        <!-- Go/No-Go 卡片 -->
+        <div class="game-card gonogo-card" onclick="location.href='/gonogo-detail.html'">
+            <div class="info">
+                <h3>反应抑制</h3>
+                <p>训练冲动控制与持续注意</p>
+            </div>
+            <div class="arrow">→</div>
+        </div>
+
+        <!-- N-Back 卡片 -->
+        <div class="game-card nback-card" onclick="location.href='/nback-detail.html'">
+            <div class="info">
+                <h3>N-Back 记忆</h3>
+                <p>训练工作记忆与注意力</p>
+            </div>
+            <div class="arrow">→</div>
+        </div>
+    <script>
+        // ============ 检查登录状态 ============
+        const userId = localStorage.getItem("user_id");
+        const username = localStorage.getItem("username");
+
+        if (!userId) {
+            location.href = "/login.html";
+        } else {
+            document.getElementById("user-bar").style.display = "flex";
+            document.getElementById("current-user").textContent = username;
+        }
+
+        // ============ 退出登录 ============
+        function logout() {
+            if (!confirm("确定要退出登录吗？")) return;
+            localStorage.removeItem("user_id");
+            localStorage.removeItem("username");
+            location.href = "/login.html";
+        }
+    </script>
+
+</body>
+</html>

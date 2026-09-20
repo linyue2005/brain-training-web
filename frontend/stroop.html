@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Stroop 色词 - 脑训练</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/stroop.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/starfield.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+
+    <div class="game-container">
+        <div class="top-bar">
+            <div class="back-btn" onclick="location.href='/'">←</div>
+            <div class="game-title">Stroop 色词</div>
+            <div style="width: 40px;"></div>
+        </div>
+
+        <!-- 难度切换 -->
+        <div class="level-switch">
+            <button data-level="beginner" onclick="switchLevel('beginner')">初级</button>
+            <button data-level="intermediate" onclick="switchLevel('intermediate')">中级</button>
+            <button data-level="advanced" onclick="switchLevel('advanced')">高级</button>
+        </div>
+        <!-- 进度栏 -->
+        <div class="progress-bar">
+            <span>进度 <strong id="progress">0/10</strong></span>
+            <span>正确 <strong id="correct-count">0</strong></span>
+            <span>错误 <strong id="wrong-count" class="error-num">0</strong></span>
+        </div>
+
+        <!-- 倒计时（中级/高级才显示） -->
+        <div class="timer-bar" id="timer-bar" style="display:none;">
+            ⏱ <span id="countdown">0.0</span> 秒
+        </div>
+        <!-- 大字展示区 -->
+        <div class="word-box">
+            <div class="word" id="word">准备</div>
+        </div>
+
+        <!-- 提示 -->
+        <p class="hint">选择文字的<strong>颜色</strong>，而非字义</p>
+
+        <!-- 颜色按钮 -->
+        <div class="color-grid">
+            <button class="color-btn" data-color="red"    onclick="chooseColor('red')">红</button>
+            <button class="color-btn" data-color="green"  onclick="chooseColor('green')">绿</button>
+            <button class="color-btn" data-color="blue"   onclick="chooseColor('blue')">蓝</button>
+            <button class="color-btn" data-color="yellow" onclick="chooseColor('yellow')">黄</button>
+            <button class="color-btn" data-color="purple" onclick="chooseColor('purple')">紫</button>
+            <button class="color-btn" data-color="orange" onclick="chooseColor('orange')">橙</button>
+        </div>
+
+        <!-- 结算遮罩 -->
+        <div class="result-overlay" id="result-overlay">
+            <div class="result-card">
+                <h2>训练完成</h2>
+                <div class="stars" id="stars">⭐⭐⭐⭐⭐</div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="final-score">0</div>
+                        <div class="stat-label">得分</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="final-correct">0</div>
+                        <div class="stat-label">正确</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="final-wrong">0</div>
+                        <div class="stat-label">错误</div>
+                    </div>
+                </div>
+                <div class="result-buttons">
+                    <button class="btn-secondary" onclick="closeResult()">再练一次</button>
+                    <button class="btn-primary-sm" onclick="location.href='/'">返回首页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ 配置 ============
+        const COLORS = [
+            { key: "red",    name: "红", css: "#e53935" },
+            { key: "green",  name: "绿", css: "#43a047" },
+            { key: "blue",   name: "蓝", css: "#1e88e5" },
+            { key: "yellow", name: "黄", css: "#fbc02d" },
+            { key: "purple", name: "紫", css: "#8e24aa" },
+            { key: "orange", name: "橙", css: "#fb8c00" }
+        ];
+
+        const LEVELS = {
+            "beginner":     { total: 10, timeLimit: 0 },
+            "intermediate": { total: 20, timeLimit: 4 },
+            "advanced":     { total: 30, timeLimit: 2 }
+        };
+
+        // ============ 状态 ============
+        const urlParams = new URLSearchParams(window.location.search);
+        let levelKey = urlParams.get("level") || "beginner";
+        if (!LEVELS[levelKey]) levelKey = "beginner";
+        let TOTAL = 10;
+        let TIME_LIMIT = 0;
+        let progress = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let currentColor = null;
+        let locked = false;
+        let timerInterval = null;
+        let timeLeft = 0;
+
+        // ============ 难度切换 ============
+        function applyLevel() {
+            const level = LEVELS[levelKey];
+            TOTAL = level.total;
+            TIME_LIMIT = level.timeLimit;
+
+            document.querySelectorAll(".level-switch button").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.level === levelKey);
+            });
+        }
+
+        function switchLevel(newLevel) {
+            levelKey = newLevel;
+            applyLevel();
+            restartGame();
+        }
+
+        // ============ 出题 ============
+        function nextQuestion() {
+            if (progress >= TOTAL) {
+                finishGame();
+                return;
+            }
+
+            progress++;
+            document.getElementById("progress").textContent = progress + "/" + TOTAL;
+
+            const meaningIdx = Math.floor(Math.random() * COLORS.length);
+            let colorIdx;
+            do {
+                colorIdx = Math.floor(Math.random() * COLORS.length);
+            } while (colorIdx === meaningIdx);
+
+            const meaning = COLORS[meaningIdx];
+            const color = COLORS[colorIdx];
+
+            currentColor = color.key;
+
+            const wordEl = document.getElementById("word");
+            wordEl.textContent = meaning.name;
+            wordEl.style.color = color.css;
+
+            locked = false;
+
+            // 倒计时
+            if (TIME_LIMIT > 0) {
+                startCountdown();
+            }
+        }
+
+        // ============ 倒计时 ============
+        function startCountdown() {
+            const timerBar = document.getElementById("timer-bar");
+            const countdownEl = document.getElementById("countdown");
+            timerBar.style.display = "block";
+            timeLeft = TIME_LIMIT;
+
+            if (timerInterval) clearInterval(timerInterval);
+            countdownEl.textContent = timeLeft.toFixed(1);
+
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    countdownEl.textContent = "0.0";
+                    if (!locked) {
+                        // 超时算错
+                        locked = true;
+                        wrongCount++;
+                        document.getElementById("wrong-count").textContent = wrongCount;
+                        document.getElementById("word").classList.add("flash-wrong");
+                        setTimeout(() => {
+                            document.getElementById("word").classList.remove("flash-wrong");
+                            nextQuestion();
+                        }, 250);
+                    }
+                } else {
+                    countdownEl.textContent = timeLeft.toFixed(1);
+                }
+            }, 100);
+        }
+
+        // ============ 用户选择 ============
+        function chooseColor(key) {
+            if (locked) return;
+            locked = true;
+            if (timerInterval) clearInterval(timerInterval);
+
+            if (key === currentColor) {
+                correctCount++;
+                document.getElementById("correct-count").textContent = correctCount;
+                document.getElementById("word").classList.add("flash-correct");
+            } else {
+                wrongCount++;
+                document.getElementById("wrong-count").textContent = wrongCount;
+                document.getElementById("word").classList.add("flash-wrong");
+            }
+
+            setTimeout(() => {
+                document.getElementById("word").classList.remove("flash-correct", "flash-wrong");
+                nextQuestion();
+            }, 250);
+        }
+
+        // ============ 计分 ============
+        function calcScore() {
+            const factor = levelKey === "beginner" ? 1.0 : (levelKey === "intermediate" ? 1.5 : 2.0);
+            let score = correctCount * 100 * factor - wrongCount * 20;
+            return Math.max(0, Math.round(score));
+        }
+
+        function calcStars(score) {
+            if (score >= 1800) return 5;
+            if (score >= 1400) return 4;
+            if (score >= 1000) return 3;
+            if (score >= 500) return 2;
+            return 1;
+        }
+
+        // ============ 结束 ============
+        function finishGame() {
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById("timer-bar").style.display = "none";
+
+            const score = calcScore();
+            const stars = calcStars(score);
+
+            document.getElementById("final-score").textContent = score;
+            document.getElementById("final-correct").textContent = correctCount;
+            document.getElementById("final-wrong").textContent = wrongCount;
+            document.getElementById("stars").textContent = "⭐".repeat(stars);
+
+            const userId = localStorage.getItem("user_id");
+            fetch("/api/record", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: parseInt(userId),
+                    game: "stroop",
+                    level: levelKey,
+                    duration: 0,
+                    errors: wrongCount,
+                    score: score
+                })
+            }).catch(err => console.error("保存失败", err));
+
+            setTimeout(() => {
+                document.getElementById("result-overlay").classList.add("show");
+            }, 300);
+        }
+
+        // ============ 重启 ============
+        function restartGame() {
+            if (timerInterval) clearInterval(timerInterval);
+            progress = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            document.getElementById("correct-count").textContent = "0";
+            document.getElementById("wrong-count").textContent = "0";
+            document.getElementById("progress").textContent = "0/" + TOTAL;
+            document.getElementById("timer-bar").style.display = "none";
+            nextQuestion();
+        }
+
+        function closeResult() {
+            document.getElementById("result-overlay").classList.remove("show");
+            restartGame();
+        }
+
+        // ============ 启动 ============
+        applyLevel();
+        restartGame();
+    </script>
+
+</body>
+</html>

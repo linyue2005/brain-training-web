@@ -1,0 +1,254 @@
+/* ==================================================
+   common.css —— 通用组件样式
+   精致、清爽的卡片风格
+   ================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Microsoft YaHei", -apple-system, sans-serif;
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: var(--text-main);
+}
+
+/* 通用白色卡片 */
+.card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: 45px 35px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+}
+
+/* 卡片顶部装饰条 */
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 0 0 4px 4px;
+}
+
+/* 通用标题 */
+h1 {
+    text-align: center;
+    font-size: 30px;
+    color: var(--text-main);
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+/* 通用副标题 */
+.subtitle {
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 14px;
+    margin-bottom: 32px;
+}
+
+/* 通用表单 */
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-bottom: 7px;
+    font-weight: 500;
+}
+
+input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid var(--gray-border);
+    background: var(--gray-bg);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text-main);
+    transition: all 0.2s;
+    outline: none;
+}
+
+input:focus {
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(143, 168, 133, 0.15);
+}
+
+input::placeholder {
+    color: var(--text-light);
+}
+
+/* 通用主按钮 */
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    margin-top: 12px;
+    letter-spacing: 2px;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(143, 168, 133, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    background: var(--primary-light);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 通用提示信息 */
+.message {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+    min-height: 20px;
+}
+
+.message.error {
+    color: var(--danger);
+}
+
+.message.success {
+    color: var(--success);
+}
+
+/* 通用链接 */
+.link {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: var(--text-sub);
+}
+
+.link a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.link a:hover {
+    text-decoration: underline;
+}
+/* ============ 主题切换按钮 ============ */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--card-bg);
+    color: var(--text-main);
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: var(--shadow-btn);
+    transition: all 0.25s ease;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 6px 15px rgba(127, 168, 120, 0.4);
+}
+/* ============ 星空粒子 ============ */
+#starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+body.dark #starfield {
+    opacity: 1;
+}
+/* ============ 早睡提醒 ============ */
+.sleep-reminder {
+    background: linear-gradient(135deg, #6a8caf, #4a6d8c);
+    color: white;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(74, 109, 140, 0.3);
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-15px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+}
+/* ============ 手机适配 ============ */
+@media (max-width: 600px) {
+    body {
+        padding: 15px;
+    }
+
+    .card {
+        padding: 30px 20px;
+        border-radius: 16px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 13px;
+        margin-bottom: 25px;
+    }
+
+    input {
+        padding: 12px 14px;
+        font-size: 16px;   /* ⚠️ 手机上输入框字号 16px 以上，否则 iOS 会自动放大 */
+    }
+
+    .btn-primary {
+        padding: 14px;
+        font-size: 16px;
+    }
+}

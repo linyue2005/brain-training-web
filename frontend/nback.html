@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>N-Back 记忆 - 脑训练</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/nback.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/starfield.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+
+    <div class="game-container">
+        <div class="top-bar">
+            <div class="back-btn" onclick="location.href='/'">←</div>
+            <div class="game-title">N-Back 记忆</div>
+            <div style="width: 40px;"></div>
+        </div>
+
+        <div class="level-switch">
+            <button data-level="beginner" onclick="switchLevel('beginner')">初级</button>
+            <button data-level="intermediate" onclick="switchLevel('intermediate')">中级</button>
+            <button data-level="advanced" onclick="switchLevel('advanced')">高级</button>
+        </div>
+
+        <div class="progress-bar">
+            <span>进度 <strong id="progress">0/20</strong></span>
+            <span>正确 <strong id="correct-count">0</strong></span>
+            <span>错误 <strong id="wrong-count" class="error-num">0</strong></span>
+        </div>
+
+        <!-- 倒计时条 -->
+        <div class="timer-bar">
+            <div class="timer-fill" id="timer-fill"></div>
+        </div>
+
+        <!-- 连击显示 -->
+        <div class="combo-display" id="combo-display"></div>
+
+        <!-- 字母展示区 -->
+        <div class="letter-box">
+            <div class="letter" id="letter">?</div>
+        </div>
+
+        <p class="hint" id="hint">看到字母后，判断是否和<strong>前 1 个</strong>相同</p>
+
+        <!-- 按钮 -->
+        <div class="action-buttons">
+            <button class="btn-no" onclick="answer(false)">否</button>
+            <button class="btn-yes" onclick="answer(true)">是</button>
+        </div>
+
+        <!-- 结算遮罩 -->
+        <div class="result-overlay" id="result-overlay">
+            <div class="result-card">
+                <h2>训练完成</h2>
+                <div class="stars" id="stars">⭐⭐⭐⭐⭐</div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="final-score">0</div>
+                        <div class="stat-label">得分</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="final-correct">0</div>
+                        <div class="stat-label">正确</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="final-wrong">0</div>
+                        <div class="stat-label">错误</div>
+                    </div>
+                </div>
+                <div class="result-buttons">
+                    <button class="btn-secondary" onclick="closeResult()">再练一次</button>
+                    <button class="btn-primary-sm" onclick="location.href='/'">返回首页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ 配置 ============
+        const LEVELS = {
+            "beginner":     { n: 1, total: 20, timeLimit: 2000 },
+            "intermediate": { n: 2, total: 25, timeLimit: 2000 },
+            "advanced":     { n: 3, total: 30, timeLimit: 1500 }
+        };
+
+        const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
+
+        // ============ 状态 ============
+        const urlParams = new URLSearchParams(window.location.search);
+        let levelKey = urlParams.get("level") || "beginner";
+        if (!LEVELS[levelKey]) levelKey = "beginner";
+        let N = 1;
+        let TOTAL = 20;
+        let TIME_LIMIT = 2000;
+
+        let progress = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let sequence = [];
+        let currentLetter = null;
+        let isMatch = false;
+        let hasAnswered = false;
+        let timeoutHandle = null;
+        let combo = 0;
+        let maxCombo = 0;
+
+        // ============ 难度切换 ============
+        function applyLevel() {
+            const lv = LEVELS[levelKey];
+            N = lv.n;
+            TOTAL = lv.total;
+            TIME_LIMIT = lv.timeLimit;
+
+            document.querySelectorAll(".level-switch button").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.level === levelKey);
+            });
+
+            document.getElementById("hint").innerHTML =
+                `看到字母后，判断是否和<strong>前 ${N} 个</strong>相同`;
+        }
+
+        function switchLevel(newLevel) {
+            levelKey = newLevel;
+            applyLevel();
+            restartGame();
+        }
+
+        // ============ 出题 ============
+        function nextRound() {
+            if (progress >= TOTAL) {
+                finishGame();
+                return;
+            }
+
+            progress++;
+            document.getElementById("progress").textContent = progress + "/" + TOTAL;
+
+            hasAnswered = false;
+            isMatch = false;
+
+            if (progress <= N) {
+                currentLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+            } else {
+                const makeMatch = Math.random() < 0.3;
+                if (makeMatch) {
+                    currentLetter = sequence[sequence.length - N];
+                    isMatch = true;
+                } else {
+                    let candidate;
+                    do {
+                        candidate = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+                    } while (candidate === sequence[sequence.length - N]);
+                    currentLetter = candidate;
+                    isMatch = false;
+                }
+            }
+
+            sequence.push(currentLetter);
+
+            const letterEl = document.getElementById("letter");
+            letterEl.textContent = currentLetter;
+            letterEl.classList.remove("flash-correct", "flash-wrong");
+
+            // 前 N 个不判断
+            if (progress <= N) {
+                hasAnswered = true;
+                if (timeoutHandle) clearTimeout(timeoutHandle);
+                timeoutHandle = setTimeout(nextRound, 1200);
+                return;
+            }
+
+            // 倒计时动画 + 超时
+            if (timeoutHandle) clearTimeout(timeoutHandle);
+            startTimerAnimation();
+            timeoutHandle = setTimeout(() => {
+                if (!hasAnswered) {
+                    handleTimeout();
+                }
+            }, TIME_LIMIT);
+        }
+
+        // ============ 用户回答 ============
+        function answer(userSaysMatch) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+            if (timeoutHandle) clearTimeout(timeoutHandle);
+            stopTimerAnimation();
+
+            const correct = (userSaysMatch === isMatch);
+
+            if (correct) {
+                correctCount++;
+                combo++;
+                if (combo > maxCombo) maxCombo = combo;
+                document.getElementById("correct-count").textContent = correctCount;
+                document.getElementById("letter").classList.add("flash-correct");
+                playSound(true);
+                showCombo();
+            } else {
+                wrongCount++;
+                combo = 0;
+                document.getElementById("wrong-count").textContent = wrongCount;
+                document.getElementById("letter").classList.add("flash-wrong");
+                playSound(false);
+                hideCombo();
+            }
+
+            setTimeout(() => {
+                document.getElementById("letter").classList.remove("flash-correct", "flash-wrong");
+                nextRound();
+            }, 400);
+        }
+
+        // ============ 超时 ============
+        function handleTimeout() {
+            hasAnswered = true;
+            wrongCount++;
+            combo = 0;
+            stopTimerAnimation();
+            document.getElementById("wrong-count").textContent = wrongCount;
+            document.getElementById("letter").classList.add("flash-wrong");
+            playSound(false);
+            hideCombo();
+            setTimeout(() => {
+                document.getElementById("letter").classList.remove("flash-wrong");
+                nextRound();
+            }, 400);
+        }
+
+        // ============ 连击显示 ============
+        function showCombo() {
+            const el = document.getElementById("combo-display");
+            if (combo >= 2) {
+                el.textContent = "🔥 连击 ×" + combo;
+                el.style.opacity = "1";
+            }
+        }
+
+        function hideCombo() {
+            const el = document.getElementById("combo-display");
+            el.textContent = "";
+            el.style.opacity = "0";
+        }
+
+        // ============ 音效 ============
+        function playSound(correct) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = correct ? 880 : 220;
+                osc.type = "sine";
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+            } catch (e) {
+                // 忽略音效错误
+            }
+        }
+
+        // ============ 倒计时动画 ============
+        function startTimerAnimation() {
+            const fill = document.getElementById("timer-fill");
+            fill.style.transition = "none";
+            fill.style.width = "100%";
+            requestAnimationFrame(() => {
+                fill.style.transition = "width " + TIME_LIMIT + "ms linear";
+                fill.style.width = "0%";
+            });
+        }
+
+        function stopTimerAnimation() {
+            const fill = document.getElementById("timer-fill");
+            const computed = getComputedStyle(fill).width;
+            fill.style.transition = "none";
+            fill.style.width = computed;
+        }
+
+        // ============ 计分 ============
+        function calcScore() {
+            const factor = levelKey === "beginner" ? 1.0 : (levelKey === "intermediate" ? 1.5 : 2.0);
+            let score = correctCount * 80 * factor - wrongCount * 30;
+            return Math.max(0, Math.round(score));
+        }
+
+        function calcStars(score) {
+            if (score >= 1600) return 5;
+            if (score >= 1200) return 4;
+            if (score >= 800) return 3;
+            if (score >= 400) return 2;
+            return 1;
+        }
+
+        // ============ 结束 ============
+        function finishGame() {
+            if (timeoutHandle) clearTimeout(timeoutHandle);
+            const score = calcScore();
+            const stars = calcStars(score);
+
+            document.getElementById("final-score").textContent = score;
+            document.getElementById("final-correct").textContent = correctCount;
+            document.getElementById("final-wrong").textContent = wrongCount;
+            document.getElementById("stars").textContent = "⭐".repeat(stars);
+
+            const userId = localStorage.getItem("user_id");
+            fetch("/api/record", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: parseInt(userId),
+                    game: "nback",
+                    level: levelKey,
+                    duration: 0,
+                    errors: wrongCount,
+                    score: score
+                })
+            }).catch(err => console.error("保存失败", err));
+
+            setTimeout(() => {
+                document.getElementById("result-overlay").classList.add("show");
+            }, 300);
+        }
+
+        function restartGame() {
+            if (timeoutHandle) clearTimeout(timeoutHandle);
+            progress = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            combo = 0;
+            maxCombo = 0;
+            sequence = [];
+            document.getElementById("correct-count").textContent = "0";
+            document.getElementById("wrong-count").textContent = "0";
+            document.getElementById("progress").textContent = "0/" + TOTAL;
+            hideCombo();
+            nextRound();
+        }
+
+        function closeResult() {
+            document.getElementById("result-overlay").classList.remove("show");
+            restartGame();
+        }
+
+        // ============ 启动 ============
+        applyLevel();
+        restartGame();
+    </script>
+
+</body>
+</html>

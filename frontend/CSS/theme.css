@@ -1,0 +1,81 @@
+/* ==================================================
+   theme.css —— 全局主题变量
+   舒服的浅绿色系
+   ================================================== */
+
+:root {
+    /* 背景渐变（浅绿） */
+    --bg-gradient: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+
+    /* 卡片背景 */
+    --card-bg: #ffffff;
+
+    /* 文字颜色 */
+    --text-main: #2e4a3a;
+    --text-sub: #7a9b85;
+    --text-light: #a8bfb0;
+
+    /* 主色（浅绿，跟游戏里那个一致的色系） */
+    --primary: #8fa885;
+    --primary-hover: #7a9270;
+    --primary-light: #c5d6bd;
+
+    /* 游戏卡片渐变（浅绿系） */
+    --blue-gradient: linear-gradient(135deg, #9ec49a, #7fa878);
+
+    /* 错误红 */
+    --danger: #e57373;
+
+    /* 成功绿 */
+    --success: #66bb6a;
+
+    /* 灰色系 */
+    --gray-bg: #f1f8f2;
+    --gray-border: #d8e8db;
+
+    /* 圆角 */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+
+    /* 阴影 */
+    --shadow-card: 0 20px 60px rgba(100, 150, 110, 0.15);
+    --shadow-btn: 0 3px 10px rgba(100, 150, 110, 0.1);
+    /* ==================================================
+   夜间模式（给 body 加 dark 类）
+   ================================================== */
+body.dark {
+    /* 背景渐变（深色） */
+    --bg-gradient: linear-gradient(135deg, #1a2520 0%, #0f1a16 100%);
+
+    /* 卡片背景 */
+    --card-bg: #1e2b24;
+
+    /* 文字颜色 */
+    --text-main: #e8f0ea;
+    --text-sub: #a8bfb0;
+    --text-light: #7a8f80;
+
+    /* 主色（绿色，稍微亮一点） */
+    --primary: #9ec49a;
+    --primary-hover: #8fb88a;
+    --primary-light: #4a5d48;
+
+    /* 游戏卡片渐变（深绿） */
+    --blue-gradient: linear-gradient(135deg, #7fa878, #5d7d57);
+
+    /* 错误红 */
+    --danger: #ef8a8a;
+
+    /* 成功绿 */
+    --success: #7ec97f;
+
+    /* 灰色系 */
+    --gray-bg: #2a3a31;
+    --gray-border: #3a4a40;
+
+    /* 阴影（深色下更明显） */
+    --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.5);
+    --shadow-btn: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+}
