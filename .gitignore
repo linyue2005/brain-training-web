@@ -1,0 +1,5 @@
+.idea/
+records.json
+__pycache__/
+*.pyc
+ngrok.exe
