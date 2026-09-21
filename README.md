@@ -34,22 +34,25 @@
 | 密码加密 | bcrypt |
 
 ## 项目结构
+
+```
 python_yy/
 ├── backend/
-│ └── main.py # FastAPI 后端
+│   └── main.py          # FastAPI 后端
 └── frontend/
-├── css/ # 样式
-├── js/ # 脚本
-├── index.html # 首页
-├── login.html # 登录
-├── register.html # 注册
-├── profile.html # 个人中心
-├── checkin.html # 打卡
-├── schulte.html # 舒尔特表
-├── stroop.html # Stroop
-├── gonogo.html # 反应抑制
-├── nback.html # N-Back
-└── sequence.html # 序列记忆
+    ├── css/             # 样式
+    ├── js/              # 脚本
+    ├── index.html       # 首页
+    ├── login.html       # 登录
+    ├── register.html    # 注册
+    ├── profile.html     # 个人中心
+    ├── checkin.html     # 打卡
+    ├── schulte.html     # 舒尔特表
+    ├── stroop.html      # Stroop
+    ├── gonogo.html      # 反应抑制
+    ├── nback.html       # N-Back
+    └── sequence.html    # 序列记忆
+```
 
 ## 本地运行
 
@@ -68,3 +71,4 @@ python main.py
 
 # 5. 浏览器访问
 http://127.0.0.1:8000
+```
